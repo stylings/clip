@@ -3,23 +3,6 @@ import Redis from "iovalkey";
 
 const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 
-const RESERVED_IDS = new Set([
-  "api",
-  "docs",
-  "settings",
-  "admin",
-  "login",
-  "logout",
-  "auth",
-  "static",
-  "_next",
-  "favicon",
-  "robots",
-  "sitemap",
-  "manifest",
-  "favicon.ico",
-]);
-
 function generateId(length: number = 8): string {
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -38,7 +21,7 @@ async function generateUniqueId(): Promise<string> {
   do {
     id = generateId(8);
     exists = await redis.get(`paste:${id}`);
-  } while (exists || RESERVED_IDS.has(id.toLowerCase()));
+  } while (exists);
   return id;
 }
 
