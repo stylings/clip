@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import Redis from "iovalkey";
+import { createStore, PasteStore } from "@/lib/stores";
 
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+const store: PasteStore = createStore();
 
 function generateId(length: number = 8): string {
   const chars =
@@ -20,7 +20,7 @@ async function generateUniqueId(): Promise<string> {
   let exists: string | null;
   do {
     id = generateId(8);
-    exists = await redis.get(`paste:${id}`);
+    exists = await store.get(id);
   } while (exists);
   return id;
 }
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     const id = await generateUniqueId();
-    await redis.set(`paste:${id}`, JSON.stringify({ encrypted }));
+    await store.set(id, JSON.stringify({ encrypted }));
 
     return NextResponse.json({ success: true, id });
   } catch (error) {
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing paste ID" }, { status: 400 });
     }
 
-    const data = await redis.get(`paste:${id}`);
+    const data = await store.get(id);
 
     if (!data) {
       return NextResponse.json({ error: "Paste not found" }, { status: 404 });
