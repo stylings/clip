@@ -6,9 +6,11 @@ export function createStore(): PasteStore {
   const redisUrl = process.env.REDIS_URL;
 
   if (redisUrl) {
+    console.log("Using Redis store");
     return new RedisStore(redisUrl);
   }
 
+  console.log("Using in-memory store");
   return new MemoryStore();
 }
 
